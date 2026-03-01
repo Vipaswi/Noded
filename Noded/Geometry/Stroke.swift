@@ -3,9 +3,10 @@ The representation of a singular stroke.
 */
 
 import Foundation
-import 
+import SwiftUI
 
 struct Stroke{
   let id : UUID;
-  var points : [CGPoint]
+  var points : [CGPoint];
+  let boundingBox : CGRect;
 }
