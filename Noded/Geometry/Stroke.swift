@@ -20,6 +20,12 @@ class Stroke : Codable {
     self.boundingBox = boundingBox;
   }
 
+  init (id: UUID, StrokePoints: [StrokePoint]) {
+    self.id = id;
+    self.strokePoints = StrokePoints;
+    self.boundingBox = Stroke.calculateBoundingBox(for: StrokePoints);
+  }
+
   init(strokePoints: [StrokePoint]) {
     self.id = UUID();
     self.strokePoints = strokePoints;
