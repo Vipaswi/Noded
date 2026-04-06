@@ -29,9 +29,22 @@
 		F86514452F3C1BE900FAB60B /* NodedUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NodedUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F8B1E1552F804B2500DAF356 /* Exceptions for "Noded" folder in "Noded" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Recognition/Untitled.swift,
+			);
+			target = F865142A2F3C1BE700FAB60B /* Noded */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F865142D2F3C1BE700FAB60B /* Noded */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F8B1E1552F804B2500DAF356 /* Exceptions for "Noded" folder in "Noded" target */,
+			);
 			path = Noded;
 			sourceTree = "<group>";
 		};
