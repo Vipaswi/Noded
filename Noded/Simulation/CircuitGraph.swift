@@ -1,26 +1,22 @@
 /**
     Author: Vipaswi Thapa
     Date: 2024-06-01
-    Description: A class representing a complete electrical circuit for SPICE export.
+    Description: A class representing the complete electrical topology of a canvas.
+    Built incrementally as the user snaps terminals. Consumed by SpiceExporter.
+    Contains no geometry, no recognition scores, no UI state.
 */
 
-struct Edge{
-    var id: UUID := UUID();
-    var fromNode: Node;
-    var toNode: Node;
-    var component: Component;
+import Foundation
 
-    init(id: UUID = UUID(), fromNode: Node, toNode: Node, component: Component) {
-        self.id = id;
-        self.fromNode = fromNode;
-        self.toNode = toNode;
-        self.component = component;
+class CircuitGraph: Codable {
+    var nodes: [UUID: Node] = [:]
+    var edges: [UUID: Edge] = [:]
+
+    init() {}
+
+    func connect(terminalA: UUID, terminalB: UUID) {}
+
+    var subGraphs: [SubGraph] {
+        return []
     }
-}
-
-class CircuitGraph{
-    var nodes: Node[] := [];
-    var components: Component[] := [];
-    var edges: 
-
 }

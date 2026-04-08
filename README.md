@@ -387,17 +387,14 @@ Recognition comes later. Stay focused.
 
 ## Backend TODO
 
-Everything below is a concrete defect or missing piece. Nothing here is speculative. Each item maps directly to the current state of the codebase versus the spec above.
+Everything below is a concrete defect or unimplemented stub. Nothing here is speculative. Each item maps directly to the current state of the codebase versus the spec above.
 
 ---
 
-### Cross-Cutting Issues (Fix First)
+### Cross-Cutting Issues
 
-- **`:=` is not valid Swift.** Every file using `:=` for property initialization must use `=` instead. Affected: `RecognitionResult.swift`, `ComponentValue.swift`, `Terminal.swift`, `Component.swift`, `Node.swift`, `CircuitGraph.swift`.
-- **Intra-target module imports are not how Swift works.** `import Stroke`, `import Point2D`, `import StrokePoint`, etc. are not valid when all files live in the same app target. Remove all of them. Swift resolves symbols within a target automatically.
-- **Two conflicting `ComponentType` definitions exist simultaneously.** One is in `RecognitionCandidate.swift` (lowercase cases, `Codable`) and one is in `Semantic/Component.swift` (uppercase cases, no `Codable`, extra cases including `.none`). These must be merged into a single authoritative definition in `Semantic/ComponentType.swift` and removed from both current locations.
 - **`Circuit/Component.swift` is an empty stub that should not exist.** `Component` belongs in `Semantic/`. Delete this file.
-- **`Node.swift` and `CircuitGraph.swift` are filed under `Simulation/`.** Per the module structure, they belong in `Topology/`. Relocate both.
+- **`Node.swift` and `CircuitGraph.swift` are filed under `Simulation/`.** Per the module structure, they belong in `Topology/`. Relocate both files within the Xcode project.
 
 ---
 
@@ -408,16 +405,11 @@ Everything below is a concrete defect or missing piece. Nothing here is speculat
 
 **`StrokePoint.swift`**
 - `point` and `timestamp` are declared `var`. Both should be `let` — `StrokePoint` is a captured input sample and must not be mutable.
-- Remove the `import Point2D` line (same-target file, no import needed).
 
 **`Stroke.swift`**
-- `strokePoints` is declared `var`. It should be `let` — `Stroke` is immutable after creation. The README states explicitly: "Must never be mutated after creation — modifications produce a new Stroke."
-- Remove `import StrokePoint` and `import SwiftUI` (SwiftUI is not needed here; StrokePoint is same-target).
-- `CGRect` is a CoreGraphics type. The import of `SwiftUI` currently covers this transitively, but the file should import `CoreGraphics` directly once SwiftUI is removed.
+- `strokePoints` is declared `var`. It should be `let` — `Stroke` is immutable after creation. The spec states explicitly: "Must never be mutated after creation — modifications produce a new Stroke." Note: making this `let` will require `FeatureExtractor.resample` to be redesigned, as it currently builds the resampled stroke by appending to a mutable local.
 
 **`GeometryDocument.swift`**
-- `addStroke` and `removeStroke` are missing the `func` keyword — the file does not compile.
-- Missing `func stroke(id: UUID) -> Stroke?` method. The spec says: "Exposes `addStroke`, `removeStroke`, and `stroke(id:)`."
 - Missing `ObservableObject` conformance (or `@Observable` macro). `GeometryDocument` is a mutable, observed class — SwiftUI will not react to changes without it.
 
 ---
@@ -425,138 +417,56 @@ Everything below is a concrete defect or missing piece. Nothing here is speculat
 ### Recognition Layer
 
 **`RecognitionResult.swift`**
-- `:=` syntax errors throughout — does not compile.
-- `Timestamp` is not a Swift type. Replace with `Date`.
-- `now()` is not a Swift function. Replace with `Date()`.
-- `addCandidate` mutates `recognitionCandidates` on a struct — requires the `mutating` keyword, or remove the method entirely (the struct is meant to be ephemeral and immutable after creation per the spec).
-- Missing `Codable` conformance.
-- Missing sort by descending confidence. The spec says candidates are "sorted by confidence" when handed to the Semantic layer.
-- `ComponentType` defined in `RecognitionCandidate.swift` must be moved to `Semantic/ComponentType.swift` (see cross-cutting issue above).
-
-**`FeatureExtractor.swift`**
-- Remove all same-target `import` lines.
-- `resample` has no return type declared — missing `-> Stroke`.
-- Inside `resample`, `var I: double` and `var D: double` use lowercase `double` which is not a Swift type. Use `Double`.
-- `distance(p1:p2:)` accesses `p1.x` and `p1.y` directly. `StrokePoint` does not expose `.x`/`.y` — the path is `p1.point.x`/`p1.point.y`.
-- All methods are already `static`, which is correct. No instance state exists — consider whether `FeatureExtractor` needs a stored-property initializer at all, or whether it should simply be an uninitializable namespace (private `init` or equivalent).
-
-**`ShapeNormalizer.swift`**
-- Remove all same-target `import` lines.
-- `StrokePoint(point: newPoint, time: strokePoint.timestamp)` uses the wrong parameter label. The `StrokePoint` initializer takes `timestamp:`, not `time:`. This exists in `rotateBy`, `scaleTo`, and `translateTo` — fix all three.
-- Same consideration as `FeatureExtractor` regarding namespace vs instantiable struct.
+- Missing sort by descending confidence. The spec says candidates are "sorted by confidence" when handed to the Semantic layer. `addCandidate` should maintain sort order, and the designated initialiser should sort the provided array.
 
 **`SymbolClassifier.swift`**
-- Remove all same-target `import` lines.
-- All methods are instance methods but the struct has no stored properties. They must be `static`. Without stored properties, instantiating `SymbolClassifier` to call methods on it is meaningless.
-- `var b = Int.max` is compared against `Double` values. Declare it as `Double` and initialize to `Double.infinity` or `Double.greatestFiniteMagnitude`.
-- `recognize` returns `(String, Double)` — it should return `[RecognitionCandidate]` per the spec. The method signature is a placeholder stub.
-- `recognize` requires a `templates: [Stroke]` argument — per the spec, templates come from the `ComponentTemplate` registry, not raw strokes.
+- `recognize` returns `(String, Double)` — it should return `[RecognitionCandidate]` per the spec. The current signature is a placeholder.
+- `recognize` takes `templates: [Stroke]` — per the spec, templates come from the `ComponentTemplate` registry, not raw strokes. The signature and body both need to change when `ComponentTemplate` is populated.
 
 ---
 
 ### Semantic Layer
 
-**`ComponentType.swift` — MISSING**
-- Create this file. Move the unified `ComponentType` enum here. It must be `Codable` and use lowercase cases. The duplicate definition in `Semantic/Component.swift` must be removed, and the one in `RecognitionCandidate.swift` must be removed and replaced with an import reference.
-
-**`ComponentTemplate.swift` — MISSING**
-- Create this file. Must define a `ComponentTemplate` struct with: normalized bounding box and relative terminal positions (`[Point2D]`).
-- Must include a static registry (`[ComponentType: ComponentTemplate]`) containing at minimum placeholder templates for every `ComponentType` case.
-- `ShapeNormalizer` and `SymbolClassifier` ultimately depend on this for template-space normalization.
-
-**`ComponentValue.swift`**
-- `:=` syntax errors — does not compile.
-- `unit: .none` references a nonexistent case. `UnitType` has no `.none` case. Either add it or change the default.
-- Missing `Codable` conformance.
-
-**`Terminal.swift`**
-- `:=` syntax errors — does not compile.
-- Missing `id: UUID`. The spec says: "Has a UUID."
-- `name: String?` does not match the spec. The spec says `label: String` (e.g., `"anode"`, `"cathode"`). Rename and make it non-optional.
-- Missing `Codable` and `Identifiable` conformances.
-- Missing `import Foundation` (needed for `UUID`).
-
-**`Component.swift`**
-- `:=` syntax errors — does not compile.
-- Missing `terminals: [Terminal]`. This is a required field per the spec.
-- Missing `transform: AffineTransform`. The spec says: "the mapping from template space to canvas space." Without it, terminal positions cannot be recomputed when the type changes, and the template overlay cannot be rendered.
-- `geometryIds` should be `geometryIDs` (consistent with `RecognitionCandidate.geometryIDs`).
-- `init` takes `type: String` — should take `type: ComponentType`.
-- `value: ComponentValue` default uses `.none` which does not exist on `UnitType`.
-- Missing `Codable` and `Identifiable` conformances.
-- The duplicate `ComponentType` enum defined at the top of this file must be deleted entirely.
+**`ComponentTemplate.swift`**
+- The static `registry` is empty (`[:]`). It must contain a `ComponentTemplate` entry for every `ComponentType` case, each defining a normalized bounding box and terminal positions. `SymbolClassifier` and the terminal-derivation logic in `Component` depend on this registry being populated before recognition can function.
 
 ---
 
 ### Topology Layer
 
-**`Node.swift`**
-- `:=` syntax errors — does not compile.
-- Has `position: Point2D` as its only data field. The spec says `Node` stores `terminalIDs: [UUID]` — the IDs of all terminals assigned to this net via snap events. Position is a derived/rendered value (centroid of terminals), not a stored field.
-- Missing `Codable` and `Identifiable` conformances.
-
 **`CircuitGraph.swift`**
-- `Edge` is defined inline here. It must be extracted into its own file `Topology/Edge.swift`.
-- `Edge` stores `fromNode: Node` and `toNode: Node` and `component: Component` by value. The spec says `Edge` stores `componentID: UUID` and two `nodeIDs: UUID` — references, not embedded values.
-- `CircuitGraph` body is incomplete — the class definition is cut off and does not compile.
-- `Node[]` is not valid Swift syntax. Use `[Node]`.
-- `:=` syntax errors — does not compile.
-- Once corrected, `CircuitGraph` must store `nodes: [UUID: Node]` and `edges: [UUID: Edge]`.
-- Must expose `connect(terminalA: UUID, terminalB: UUID)` which creates or merges nodes when a snap event occurs.
-- Must expose `subGraphs: [SubGraph]` as a computed property that runs a connected-components traversal on demand.
+- `connect(terminalA:terminalB:)` is an empty stub. Must implement: look up or create nodes for each terminal, merge nodes if both already exist in the graph (union-find or equivalent), and create an `Edge` if a component spans the connection.
+- `subGraphs` is an empty stub. Must implement a connected-components traversal over `nodes` and `edges` and return one `SubGraph` per connected component.
 
-**`Edge.swift` — MISSING (currently inlined in `CircuitGraph.swift`)**
-- Extract into its own file in `Topology/`.
-- Fields: `id: UUID`, `componentID: UUID`, `nodeIDs: (UUID, UUID)`.
-- Must conform to `Codable` and `Identifiable`.
-
-**`SubGraph.swift` — MISSING**
-- Create this file. Must define a `SubGraph` struct containing a subset of `Node` and `Edge` values.
-- Produced by the connected-components traversal on `CircuitGraph`.
-- Must conform to `Codable`.
-
-**`GraphBuilder.swift` — MISSING**
-- Create this file. Must define a `GraphBuilder` struct with a single static entry point: accepts a `[Component]` and `[(terminalID: UUID, terminalID: UUID)]` (persisted snap connections) and returns a `CircuitGraph`.
-- Must be deterministic and order-independent.
-- Must not scan geometry or cluster by proximity.
+**`GraphBuilder.swift`**
+- `build(components:connections:)` is an empty stub. Must implement: iterate persisted `(terminalID, terminalID)` pairs, call `connect` on the graph for each, and add a corresponding `Edge` for each component whose terminals are fully connected.
 
 ---
 
 ### Export Layer
 
-**`SpiceExporter.swift` — MISSING**
-- Create this file under `Export/`.
-- Must define a `SpiceExporter` struct (or enum) with a single static entry point: accepts a `SubGraph` and returns a SPICE netlist `String`.
-- Must map each `Node` to a net name and each `Edge`/`Component` to the appropriate SPICE element line.
-- Must not import Geometry, Recognition, or Simulation.
+**`SpiceExporter.swift`**
+- `export(subGraph:)` is an empty stub. Must implement: assign net names to each `Node`, emit a SPICE element line for each `Edge`/`Component` (e.g., `R1 net1 net2 10k`), and append simulation directives (`.tran`, `.ac`, etc.).
 
 ---
 
 ### Simulation Layer
 
-**`LTSpiceRunner.swift` — MISSING**
-- Create this file under `Simulation/`.
-- Must manage the LTspice process lifecycle: write netlist to a temp file, spawn LTspice via `Process()` with `-b` flag, wait for completion, return paths to `.raw` and `.log` output files.
-- Must not parse results. Must not mutate the graph.
+**`LTSpiceRunner.swift`**
+- `run(netlist:)` is an empty stub. Must implement: write the netlist string to a temp file, spawn LTspice via `Process()` with the `-b` flag, wait for the process to exit, and return the paths to the `.raw` and `.log` output files.
 
-**`SimulationResult.swift` — MISSING**
-- Create this file under `Simulation/`.
-- Must define a `SimulationResult` struct that parses LTspice `.raw` and `.log` output.
-- Must store `nodeVoltages: [UUID: Double]`, `branchCurrents: [UUID: Double]`, and time-series waveform data.
-- Must conform to `Codable`.
-- Must never be stored inside `Component`.
+**`SimulationResult.swift`**
+- Missing time-series waveform data. The spec requires storing waveform data for graphing alongside `nodeVoltages` and `branchCurrents`. Add a field such as `waveforms: [UUID: [Double]]` or equivalent before this struct is considered complete.
+- Parsing logic is not implemented. The struct currently holds only the data shape — the `.raw` and `.log` parsing that populates it must be written.
 
 ---
 
 ### Persistence Layer
 
-**`NodedDocument.swift` — MISSING**
-- Create this file under `Persistence/`.
-- Must conform to `FileDocument` for SwiftUI document-based app integration.
-- Must aggregate: `GeometryDocument`, `[Component]`, `CircuitGraph`, `[(terminalID: UUID, terminalID: UUID)]` (snap connections), and optional `SimulationResult` metadata.
-- On load, must pass persisted snap connections to `GraphBuilder` to reconstruct `CircuitGraph` exactly — no inference.
-- Must encode and decode to/from a `.noded` file format (JSON).
-- Must not contain any processing logic.
+**`NodedDocument.swift`**
+- `init(configuration:)` is an empty stub — on load it ignores the file contents entirely and produces a blank document. Must implement JSON decoding of all aggregated types from the `.noded` file bundle.
+- `fileWrapper(configuration:)` is an empty stub — it never serialises anything. Must implement JSON encoding of `GeometryDocument`, `[Component]`, `CircuitGraph`, snap connections, and optional `SimulationResult`.
+- A `UTType` for the `.noded` extension must be declared and registered in the app's `Info.plist` so that `readableContentTypes` can reference it instead of `.json`.
 
 ---
 

@@ -13,24 +13,7 @@
       - It is ephemeral and can be regenerated at any time from the original strokes.
 */
 
-// NOTE: In Swift, you import module targets (e.g. NodedCore), not individual files.
-// These imports assume each layer is its own Swift package module, or that all
-// files live in the same NodedCore target (in which case no imports are needed).
-
 import Foundation
-
-/// The set of electrical component types the recognizer can hypothesize.
-/// Extend this enum as new symbol templates are added to SymbolClassifier.
-enum ComponentType: String, Codable {
-    case resistor
-    case capacitor
-    case inductor
-    case voltageSource
-    case currentSource
-    case ground
-    case wire
-    case unknown
-}
 
 /// A single recognition hypothesis for one or more strokes.
 ///

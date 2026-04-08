@@ -1,29 +1,29 @@
 /**
     Author: Vipaswi Thapa
     Date: 2024-06-01
-    Description: A struct holding all the components for a single geometry document  recognition result. There are no more duplicates at this point, as the recognition candidates are resolved. 
-                 The struct also stores the magnitude, and the unit type, though this is a future implementation.    
+    Description: A struct representing the electrical parameter of a component — resistance,
+    capacitance, voltage, etc. Stores a magnitude and a unit type.
 */
-
 
 import Foundation
 
-enum UnitType {
-    case Ohms
-    case Volts
-    case Siemens
-    case Amperes
-    case Watts
-    case Farads
-    case Henries
+enum UnitType: String, Codable {
+    case ohms
+    case volts
+    case siemens
+    case amperes
+    case watts
+    case farads
+    case henries
+    case none
 }
 
-struct ComponentValue{
-    var magnitude: Double := 0.0;
-    var unit: UnitType := .none;
+struct ComponentValue: Codable {
+    var magnitude: Double = 0.0
+    var unit: UnitType = .none
 
-    init(magnitude: Double, unit: UnitType) {
-        self.magnitude = magnitude;
-        self.unit = unit;
+    init(magnitude: Double = 0.0, unit: UnitType = .none) {
+        self.magnitude = magnitude
+        self.unit = unit
     }
 }

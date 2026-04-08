@@ -6,12 +6,11 @@
 */
 
 import Foundation
-import Point2D
 
-struct StrokePoint: Codable { // Perhaps add equatable
+struct StrokePoint: Codable {
     var point: Point2D
     var timestamp: TimeInterval
-    
+
     init(point: Point2D, timestamp: TimeInterval) {
         self.point = point
         self.timestamp = timestamp

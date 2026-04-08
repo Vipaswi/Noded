@@ -1,20 +1,18 @@
 /**
     Author: Vipaswi Thapa
     Date: 2024-06-01
-    Description: This is a structure representing a node in a circuit. This is derived from stroke data.
+    Description: A struct representing an electrical net. Stores the UUIDs of all terminals
+    assigned to this net via explicit snap events. Never created manually by the user.
 */
 
-struct Node{
-    var id: UUID := UUID(); 
-    var position: Point2D;
+import Foundation
 
-    init(id: UUID = UUID(), position: Point2D) {
-        self.id = id;
-        self.position = position;
-    }
+struct Node: Codable, Identifiable {
+    let id: UUID
+    var terminalIDs: [UUID]
 
-    init(position: Point2D) {
-        self.id = UUID();
-        self.position = position;
+    init(id: UUID = UUID(), terminalIDs: [UUID] = []) {
+        self.id = id
+        self.terminalIDs = terminalIDs
     }
 }
