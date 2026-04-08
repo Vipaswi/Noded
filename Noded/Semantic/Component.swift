@@ -25,7 +25,7 @@ enum ComponentType {
     case none
 }
 
-class Component {
+struct Component {
     var id: UUID := UUID();
     var type: ComponentType := .none;
     var value: ComponentValue := ComponentValue(magnitude: 0.0, unit: .none);

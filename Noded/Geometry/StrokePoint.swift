@@ -8,7 +8,7 @@
 import Foundation
 import Point2D
 
-class StrokePoint: Codable { // Perhaps add equatable
+struct StrokePoint: Codable { // Perhaps add equatable
     var point: Point2D
     var timestamp: TimeInterval
     

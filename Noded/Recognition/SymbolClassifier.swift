@@ -11,7 +11,7 @@ import Foundation
 import FeatureExtractor
 import ShapeNormalizer
 
-class SymbolClassifier {
+struct SymbolClassifier {
 
     func recognize(stroke: Stroke, templates: [Stroke]) -> (String, Double) {
         // Placeholder for the actual classification logic

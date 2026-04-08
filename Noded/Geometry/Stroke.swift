@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import StrokePoint
 
-class Stroke : Codable {
+struct Stroke : Codable {
   let id : UUID;
   var strokePoints : [StrokePoint];
   let boundingBox : CGRect;

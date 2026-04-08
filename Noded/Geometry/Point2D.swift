@@ -6,7 +6,7 @@
 
 import CoreGraphics
 
-class Point2D: Codable, Hashable {
+struct Point2D: Codable, Hashable {
     var x: Double
     var y: Double
     

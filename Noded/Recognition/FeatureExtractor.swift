@@ -10,7 +10,7 @@ import Foundation
 import Point2D
 import GeometryDocument
 
-class FeatureExtractor {
+struct FeatureExtractor {
 
     static func resample(stroke : Stroke, sampleSize: Int){
         // The average distance between points

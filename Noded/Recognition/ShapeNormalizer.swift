@@ -8,7 +8,7 @@ import Stroke
 import StrokePoint
 import Point2D
 
-class ShapeNormalizer{
+struct ShapeNormalizer {
 
     // Calculates a centroid for a given stroke
     static func calculateCentroid(stroke: Stroke) -> Point2D {
