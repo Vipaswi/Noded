@@ -10,7 +10,7 @@ import CoreGraphics
 
 struct Stroke: Codable {
     let id: UUID
-    var strokePoints: [StrokePoint]
+    let strokePoints: [StrokePoint]
     let boundingBox: CGRect
 
     init(strokePoints: [StrokePoint], boundingBox: CGRect) {

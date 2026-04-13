@@ -8,8 +8,8 @@
 import Foundation
 
 struct StrokePoint: Codable {
-    var point: Point2D
-    var timestamp: TimeInterval
+    let point: Point2D
+    let timestamp: TimeInterval
 
     init(point: Point2D, timestamp: TimeInterval) {
         self.point = point

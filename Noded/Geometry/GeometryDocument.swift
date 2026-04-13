@@ -7,9 +7,15 @@
 */
 
 import Foundation
+import Observation
 
+@Observable
 class GeometryDocument: Codable {
     var strokes: [UUID: Stroke] = [:]
+
+    private enum CodingKeys: String, CodingKey {
+        case strokes
+    }
 
     init(strokes: [Stroke] = []) {
         for stroke in strokes {

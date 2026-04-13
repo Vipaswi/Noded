@@ -398,22 +398,6 @@ Everything below is a concrete defect or unimplemented stub. Nothing here is spe
 
 ---
 
-### Geometry Layer
-
-**`Point2D.swift`**
-- `x` and `y` are declared `var`. They should be `let` — `Point2D` is immutable after creation.
-
-**`StrokePoint.swift`**
-- `point` and `timestamp` are declared `var`. Both should be `let` — `StrokePoint` is a captured input sample and must not be mutable.
-
-**`Stroke.swift`**
-- `strokePoints` is declared `var`. It should be `let` — `Stroke` is immutable after creation. The spec states explicitly: "Must never be mutated after creation — modifications produce a new Stroke." Note: making this `let` will require `FeatureExtractor.resample` to be redesigned, as it currently builds the resampled stroke by appending to a mutable local.
-
-**`GeometryDocument.swift`**
-- Missing `ObservableObject` conformance (or `@Observable` macro). `GeometryDocument` is a mutable, observed class — SwiftUI will not react to changes without it.
-
----
-
 ### Recognition Layer
 
 **`RecognitionResult.swift`**

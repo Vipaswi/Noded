@@ -12,7 +12,7 @@ struct FeatureExtractor {
     static func resample(stroke: Stroke, sampleSize: Int) -> Stroke {
         let I: Double = pathLength(stroke: stroke) / Double(sampleSize)
         var D: Double = 0.0
-        var resampledStroke = Stroke(strokePoints: [], boundingBox: stroke.boundingBox)
+        var points: [StrokePoint] = []
 
         for i in 1..<stroke.strokePoints.count {
             let d: Double = distance(p1: stroke.strokePoints[i-1], p2: stroke.strokePoints[i])
@@ -20,15 +20,14 @@ struct FeatureExtractor {
                 let qx = stroke.strokePoints[i-1].point.x + ((I - D) / d) * (stroke.strokePoints[i].point.x - stroke.strokePoints[i-1].point.x)
                 let qy = stroke.strokePoints[i-1].point.y + ((I - D) / d) * (stroke.strokePoints[i].point.y - stroke.strokePoints[i-1].point.y)
                 let averageTimestamp = (stroke.strokePoints[i-1].timestamp + stroke.strokePoints[i].timestamp) / 2.0
-                let newStrokePoint = StrokePoint(point: Point2D(x: qx, y: qy), timestamp: averageTimestamp)
-                resampledStroke.strokePoints.append(newStrokePoint)
+                points.append(StrokePoint(point: Point2D(x: qx, y: qy), timestamp: averageTimestamp))
                 D = 0.0
             } else {
                 D += d
             }
         }
 
-        return resampledStroke
+        return Stroke(strokePoints: points)
     }
 
     static func pathLength(stroke: Stroke) -> Double {
