@@ -400,9 +400,6 @@ Everything below is a concrete defect or unimplemented stub. Nothing here is spe
 
 ### Recognition Layer
 
-**`RecognitionResult.swift`**
-- Missing sort by descending confidence. The spec says candidates are "sorted by confidence" when handed to the Semantic layer. `addCandidate` should maintain sort order, and the designated initialiser should sort the provided array.
-
 **`SymbolClassifier.swift`**
 - `recognize` returns `(String, Double)` — it should return `[RecognitionCandidate]` per the spec. The current signature is a placeholder.
 - `recognize` takes `templates: [Stroke]` — per the spec, templates come from the `ComponentTemplate` registry, not raw strokes. The signature and body both need to change when `ComponentTemplate` is populated.

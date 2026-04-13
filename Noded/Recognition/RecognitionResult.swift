@@ -16,16 +16,17 @@ struct RecognitionResult: Codable {
     init(id: UUID = UUID(), generated: Date = Date(), recognitionCandidates: [RecognitionCandidate] = []) {
         self.id = id
         self.generated = generated
-        self.recognitionCandidates = recognitionCandidates
+        self.recognitionCandidates = recognitionCandidates.sorted()
     }
 
     init(recognitionCandidates: [RecognitionCandidate]) {
         self.id = UUID()
         self.generated = Date()
-        self.recognitionCandidates = recognitionCandidates
+        self.recognitionCandidates = recognitionCandidates.sorted()
     }
 
     mutating func addCandidate(candidate: RecognitionCandidate) {
-        recognitionCandidates.append(candidate)
+        let index = recognitionCandidates.firstIndex(where: { $0.confidence < candidate.confidence }) ?? recognitionCandidates.endIndex
+        recognitionCandidates.insert(candidate, at: index)
     }
 }
